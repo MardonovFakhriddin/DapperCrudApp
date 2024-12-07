@@ -1,4 +1,5 @@
 using Dapper;
+using Infrastructure.DataContext;
 using Infrastructure.Models;
 using Npgsql;
 
@@ -7,19 +8,20 @@ using Infrastructure.Interfaces;
 
 public class GroupsService : IGroupsService
 {
-    private string connectionString = "Server=localhost; port = 5432; Database = dappercruddb; username = postgres; password = LMard1909";
+    private readonly DapperContext context;
 
+    public GroupsService()
+    {
+        context = new DapperContext();
+    }
     
     public bool DeleteGroup(int id)
     {
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
-            {
                 var cmd = "Delete from Groups where id = @id";
-                var result = connection.Execute(cmd, new { Id = @id });
+                var result = context.Connection().Execute(cmd, new { Id = @id });
                 return result > 0;
-            }
         }
         catch (Exception e)
         {
@@ -32,12 +34,9 @@ public class GroupsService : IGroupsService
     {
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
-            {
                 var cmd = "UPDATE Groups SET group_name = @group_name WHERE id = @Id";
-                var result = connection.Execute(cmd, group);
+                var result = context.Connection().Execute(cmd, group);
                 return result > 0;
-            }
         }
         catch (Exception e)
         {
@@ -50,12 +49,9 @@ public class GroupsService : IGroupsService
     {
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
-            {
                 var cmd = "INSERT INTO Groups (group_id,group_name, course_id) VALUES (@group_id,@group_name, @course_id)";
-                var result = connection.Execute(cmd, group);
+                var result = context.Connection().Execute(cmd, group);
                 return result > 0;
-            }
         }
         catch (Exception e)
         {
@@ -68,12 +64,9 @@ public class GroupsService : IGroupsService
     {
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
-            {
                 var cmd = "Select * from Groups";
-                List<Groups> groups = connection.Query<Groups>(cmd).ToList();
+                List<Groups> groups = context.Connection().Query<Groups>(cmd).ToList();
                 return groups;
-            }
         }
         catch (Exception e)
         {
@@ -86,12 +79,9 @@ public class GroupsService : IGroupsService
     {
         try
         {
-            using (NpgsqlConnection connection = new NpgsqlConnection(connectionString))
-            {
                 string cmd = "SELECT * FROM Groups WHERE id = @id";
-                Groups groups = connection.QuerySingleOrDefault<Groups>(cmd, new { Id = @id });
+                Groups groups = context.Connection().QuerySingleOrDefault<Groups>(cmd, new { Id = @id });
                 return groups;
-            }
         }
         catch (Exception e)
         {
